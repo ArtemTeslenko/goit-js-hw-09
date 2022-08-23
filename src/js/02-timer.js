@@ -1,11 +1,23 @@
 import flatpickr from 'flatpickr';
+import Notiflix from 'notiflix';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const refs = {
   start: document.querySelector('[data-start'),
+  days: document.querySelector('[data-days'),
+  hours: document.querySelector('[data-hours'),
+  minutes: document.querySelector('[data-minutes'),
+  seconds: document.querySelector('[data-seconds'),
 };
-let currentTime = null;
-let chosenTime = null;
+let chosenTime = 0;
+const failureSettings = {
+  clickToClose: true,
+  useIcon: true,
+  position: 'center-top',
+  width: '380px',
+  distance: '20px',
+  fontSize: '20px',
+};
 
 const options = {
   enableTime: true,
@@ -13,41 +25,58 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
+    if (timer.intervalId !== null) {
+      Notiflix.Notify.failure(
+        'Please reload the page to update timer',
+        failureSettings
+      );
+      return;
+    }
+    const currentTime = Date.now();
     chosenTime = new Date(selectedDates[0]).getTime();
-    currentTime = Date.now();
+
     checkValidityOfDate(currentTime, chosenTime);
   },
 };
 
 const fp = flatpickr('#datetime-picker', options);
 
-function checkValidityOfDate(current, chosen) {
-  if (chosen <= current) {
-    window.alert('Please choose a date in the future');
-  } else {
-    refs.start.removeAttribute('disabled', 'disabled');
-  }
-}
-
 const timer = {
+  intervalId: null,
   start() {
-    setInterval(() => {
-      // const currentTime = Date.now();
-      // const delta = currentTime - startTime;
-      // const timeComponents = convertMs(delta);
+    this.intervalId = setInterval(() => {
       const currentTime = Date.now();
       const delta = chosenTime - currentTime;
-      const timeComponents = convertMs(delta);
+      const { days, hours, minutes, seconds } = convertMs(delta);
 
-      console.log(timeComponents);
+      updateClockFace(days, hours, minutes, seconds);
+      stopTimer(delta, this.intervalId);
+
+      console.log(days, hours, minutes, seconds);
     }, 1000);
   },
 };
 
 refs.start.addEventListener('click', onStartClick);
 
+function checkValidityOfDate(current, chosen) {
+  if (chosen <= current) {
+    Notiflix.Notify.failure(
+      'Please choose a date in the future',
+      failureSettings
+    );
+  } else {
+    refs.start.removeAttribute('disabled', 'disabled');
+  }
+}
+
 function onStartClick() {
   timer.start();
+  refs.start.setAttribute('disabled', 'disabled');
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
 }
 
 function convertMs(ms) {
@@ -56,19 +85,25 @@ function convertMs(ms) {
   const hour = minute * 60;
   const day = hour * 24;
 
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const days = addLeadingZero(Math.floor(ms / day));
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  const seconds = addLeadingZero(
+    Math.floor((((ms % day) % hour) % minute) / second)
+  );
 
   return { days, hours, minutes, seconds };
 }
 
-// -------------------------------------------TEST BTN
-const btnEl = document.querySelector('.test');
-btnEl.addEventListener('click', testFun);
-function testFun(e) {
-  console.log(chosenTime);
+function updateClockFace(days, hours, minutes, seconds) {
+  refs.days.textContent = days;
+  refs.hours.textContent = hours;
+  refs.minutes.textContent = minutes;
+  refs.seconds.textContent = seconds;
 }
 
-//Date.now() - возвращает текущее время
+function stopTimer(delta, intervalId) {
+  if (delta <= 1000) {
+    clearInterval(intervalId);
+  }
+}
