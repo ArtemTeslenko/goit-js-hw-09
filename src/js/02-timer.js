@@ -51,8 +51,6 @@ const timer = {
 
       updateClockFace(days, hours, minutes, seconds);
       stopTimer(delta, this.intervalId);
-
-      console.log(days, hours, minutes, seconds);
     }, 1000);
   },
 };
