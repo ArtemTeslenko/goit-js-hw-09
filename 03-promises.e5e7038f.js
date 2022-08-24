@@ -1,0 +1,2 @@
+const e={formEl:document.querySelector(".form"),firstDelay:document.querySelector('[name="delay"]'),stepDelay:document.querySelector('[name="step"]'),amountDelay:document.querySelector('[name="amount"]')};e.formEl.addEventListener("submit",(function(t){t.preventDefault(),function(t,o){Math.random();const n=Number(e.amountDelay.value);for(let e=1;e<=n;e+=1)console.log(e)}()}));
+//# sourceMappingURL=03-promises.e5e7038f.js.map
