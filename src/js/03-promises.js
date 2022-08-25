@@ -4,35 +4,45 @@ const refs = {
   stepDelay: document.querySelector('[name="step"]'),
   amountDelay: document.querySelector('[name="amount"]'),
 };
-// let promisAmount = 0;
 
 refs.formEl.addEventListener('submit', function (e) {
   e.preventDefault();
-  // promisAmount = Number(refs.amountDelay.value);
-  // console.log(promisAmount);
-  // for (let i = 1; i <= promisAmount; i += 1) {
-  //   console.log(i);
-  // }
-  // createPromise().then(console.log('✔'));
-  // catch(console.log('❌'));
-  createPromise();
+  showPromisResult(Number(refs.amountDelay.value));
 });
 // Number(refs.amountDelay.value)
 
 function createPromise(position, delay) {
   const shouldResolve = Math.random() > 0.3;
+  return new Promise((resolve, reject) => {
+    if (shouldResolve) {
+      resolve({ position, delay });
+    } else {
+      reject({ position, delay });
+    }
+  });
+}
 
-  const promisAmount = Number(refs.amountDelay.value);
-  for (let i = 1; i <= promisAmount; i += 1) {
-    console.log(i);
+// const am = 3;
+function showPromisResult(amount) {
+  const intervalId = setInterval(() => {
+    console.log(amount);
+    amount -= 1;
+    clearPromisesInterval(intervalId, amount);
+
+    createPromise(2, 1500)
+      .then(({ position, delay }) => {
+        console.log(`✅ Fulfilled promise ${position} in ${delay}ms`);
+      })
+      .catch(({ position, delay }) => {
+        console.log(`❌ Rejected promise ${position} in ${delay}ms`);
+      });
+  }, 1000);
+}
+
+// showPromisResult(am);
+
+function clearPromisesInterval(id, stopPoint) {
+  if (stopPoint < 1) {
+    clearInterval(id);
   }
-
-  // return new Promise((resolve, reject) => {
-  //   if (shouldResolve) {
-  //     resolve;
-  //   }
-  // else {
-  //   reject;
-  // }
-  // });
 }
